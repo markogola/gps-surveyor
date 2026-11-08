@@ -47,7 +47,7 @@
         <source src="../video/background-recording-demo.mp4" type="video/mp4">
         Your browser can't play this video. <a href="../video/background-recording-demo.mp4">Download it</a>.
       </video>
-      <a href="../video/background-recording-demo.mp4">Open the video on its own (MP4, 1 min 37 s)</a>
+      <a href="../video/background-recording-demo.mp4">Open the video on its own (MP4, 2 min 13 s)</a>
     </div>
     <div>
       <h1>How background route recording works</h1>
@@ -55,8 +55,11 @@
 
       <h2>What the video shows</h2>
       <ol>
-        <li>The user opens GPS Surveyor and goes to the <b>Record</b> tab.</li>
-        <li>They choose an interval (5 seconds in the demo) and tap <b>Start recording</b>.</li>
+        <li>On first launch the app explains why it needs location, before asking for anything.</li>
+        <li>The user taps <b>Allow location</b> and Android shows its location permission dialog.</li>
+        <li>The user chooses <b>Precise</b> and <b>While using the app</b>, then allows notifications (used for the recording notification).</li>
+        <li>With permission granted, the app shows the live location.</li>
+        <li>On the <b>Record</b> tab the user picks a 5-second interval and taps <b>Start recording</b>.</li>
         <li>A location foreground service starts and saves a GPS point at that interval.</li>
         <li>A persistent notification shows the route is being recorded, with the point count and distance.</li>
         <li>The user leaves the app; recording continues in the background and the notification keeps updating.</li>
@@ -67,6 +70,8 @@
       <dl class="facts">
         <dt>Permission</dt>
         <dd><code>FOREGROUND_SERVICE_LOCATION</code>, with a <code>location</code> foreground service type.</dd>
+        <dt>Location permission</dt>
+        <dd>Requested at runtime with Android's standard dialog, after an in-app explanation. The user chooses precise location “While using the app”.</dd>
         <dt>When it runs</dt>
         <dd>Only between the user tapping “Start recording” and “Stop &amp; save” (or the Stop button in the notification). It never starts on its own.</dd>
         <dt>Why it is needed</dt>
