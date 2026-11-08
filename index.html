@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPS Surveyor – Routes &amp; Points</title>
+<meta name="description" content="GPS Surveyor shows precise GPS coordinates (Decimal, DMS, UTM), saves averaged waypoints, records routes at set intervals and exports GPX, KML, CSV and GeoJSON. No account, no ads.">
+<meta property="og:title" content="GPS Surveyor – Routes & Points">
+<meta property="og:description" content="Precise coordinates, averaged waypoints and interval route recording for field work, with GPX/KML/CSV/GeoJSON export.">
+<meta property="og:image" content="https://markogola.github.io/gps-surveyor/img/icon-512.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  :root {
+    --bg: #ffffff; --bg-soft: #f2f7f8; --fg: #172026; --muted: #55626a; --line: #dbe5e8;
+    --teal: #00838f; --teal-ink: #006069; --teal-soft: #e0f3f5; --accent: #ff6d00; --card: #ffffff;
+    --phone: #121417; --phone-fg: #e9eef0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101416; --bg-soft: #161c1f; --fg: #e6ecee; --muted: #a2afb5; --line: #27323a;
+      --teal: #4dd0e1; --teal-ink: #4dd0e1; --teal-soft: #12313a; --card: #182024;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--teal-ink); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+  header.top { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; color: var(--fg); }
+  .brand img { width: 36px; height: 36px; border-radius: 9px; }
+  nav a { margin-left: 20px; text-decoration: none; color: var(--muted); font-size: 15px; }
+  nav a:hover { color: var(--fg); }
+
+  .hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: center; padding: 40px 16px 72px; }
+  .eyebrow { display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--teal-ink); background: var(--teal-soft); padding: 4px 10px; border-radius: 999px; }
+  h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.1; margin: 16px 0 16px; letter-spacing: -0.02em; }
+  .lead { font-size: 1.15rem; color: var(--muted); max-width: 34em; margin: 0 0 28px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; }
+  .btn.primary { background: #00838f; color: #fff; }
+  .btn.ghost { border: 1px solid var(--line); color: var(--fg); }
+  .soon { font-size: 14px; color: var(--muted); }
+
+  /* phone mock-up */
+  .phone { justify-self: center; width: 280px; border-radius: 34px; background: var(--phone); padding: 12px; box-shadow: 0 1px 0 var(--line), 0 24px 48px rgba(0,40,48,.18); }
+  .screen { border-radius: 24px; overflow: hidden; background: #121417; color: var(--phone-fg); font-size: 12px; }
+  .panel { background: #00838f; padding: 16px 14px 14px; text-align: center; color: #fff; }
+  .fix { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; }
+  .fix .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #66bb6a; margin-right: 6px; vertical-align: middle; }
+  .lbl { opacity: .8; font-size: 11px; margin-top: 10px; }
+  .val { font: 700 22px/1.2 ui-monospace, "Cascadia Mono", Consolas, monospace; letter-spacing: -0.02em; }
+  .chips { display: flex; justify-content: center; gap: 5px; margin-top: 12px; }
+  .chips span { border: 1px solid rgba(255,255,255,.6); border-radius: 7px; padding: 2px 7px; font-size: 10px; }
+  .chips span.on { background: #fff; color: #00838f; font-weight: 700; }
+  .rows { padding: 6px 14px 10px; }
+  .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #262c31; }
+  .row span:first-child { color: #9aa6ab; }
+  .tabbar { display: flex; justify-content: space-around; padding: 10px 0 12px; border-top: 1px solid #262c31; font-size: 10px; color: #9aa6ab; }
+  .tabbar .on { color: #4dd0e1; font-weight: 700; }
+
+  section { padding: 64px 0; }
+  section.soft { background: var(--bg-soft); }
+  h2 { font-size: clamp(1.6rem, 3.4vw, 2.1rem); margin: 0 0 8px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); margin: 0 0 32px; max-width: 40em; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .card h3 { margin: 12px 0 6px; font-size: 1.08rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 15px; }
+  .icon { width: 40px; height: 40px; border-radius: 10px; background: var(--teal-soft); display: grid; place-items: center; }
+  .icon svg { width: 22px; height: 22px; stroke: var(--teal-ink); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .formats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .fmt { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: var(--card); }
+  .fmt b { font-size: 1.1rem; color: var(--teal-ink); }
+  .fmt div { font-size: 14px; color: var(--muted); }
+
+  .who { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .who div { border-left: 3px solid var(--teal); padding: 4px 0 4px 16px; }
+  .who b { display: block; }
+  .who span { color: var(--muted); font-size: 15px; }
+
+  .privacy { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .checks { list-style: none; padding: 0; margin: 0; }
+  .checks li { padding: 8px 0 8px 30px; position: relative; }
+  .checks li::before { content: ""; position: absolute; left: 0; top: 13px; width: 16px; height: 9px; border-left: 2.5px solid var(--teal); border-bottom: 2.5px solid var(--teal); transform: rotate(-45deg); }
+  .note { font-size: 14px; color: var(--muted); border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: var(--card); }
+
+  footer { border-top: 1px solid var(--line); padding: 28px 0 40px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; gap: 40px; padding-top: 16px; }
+    .grid, .who { grid-template-columns: 1fr; }
+    .formats { grid-template-columns: 1fr 1fr; }
+    .privacy { grid-template-columns: 1fr; }
+    nav { display: none; }
+    section { padding: 48px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="wrap top">
+  <a class="brand" href="#"><img src="img/icon-192.png" alt="" width="36" height="36">GPS Surveyor</a>
+  <nav><a href="#features">Features</a><a href="#export">Export</a><a href="#privacy">Privacy</a><a href="#contact">Contact</a></nav>
+</header>
+
+<main>
+<div class="wrap hero">
+  <div>
+    <span class="eyebrow">Android · Free</span>
+    <h1>Precise GPS points and routes for field work</h1>
+    <p class="lead">GPS Surveyor shows your exact position in Decimal, DMS or UTM, averages dozens of fixes into one precise waypoint, records routes at the interval you choose, and exports everything for Google Earth, GIS and spreadsheets.</p>
+    <div class="cta">
+      <a class="btn primary" href="#contact">Get notified at launch</a>
+      <a class="btn ghost" href="#features">See features</a>
+    </div>
+    <p class="soon">Coming soon to Google Play.</p>
+  </div>
+
+  <div class="phone" aria-label="The GPS Surveyor location screen, with sample coordinates" role="img">
+    <div class="screen">
+      <div class="panel">
+        <div class="fix"><span><span class="dot"></span>Good fix</span><span>±3 m</span></div>
+        <div class="lbl">Easting · Zone 37M</div>
+        <div class="val">257110.7 mE</div>
+        <div class="lbl">Northing</div>
+        <div class="val">9857710.0 mN</div>
+        <div class="chips"><span>Decimal</span><span>DMS</span><span>Deg Min</span><span class="on">UTM</span></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span>Altitude (sea level)</span><span>1,661.4 m</span></div>
+        <div class="row"><span>Satellites used</span><span>14 / 22</span></div>
+        <div class="row"><span>Systems</span><span>GPS · Galileo · BeiDou</span></div>
+        <div class="row"><span>Decimal</span><span>-1.286389, 36.817223</span></div>
+      </div>
+      <div class="tabbar"><span class="on">My location</span><span>Record</span><span>Map</span><span>Saved</span></div>
+    </div>
+  </div>
+</div>
+
+<section id="features" class="soft">
+  <div class="wrap">
+    <h2>Everything you need in the field</h2>
+    <p class="sub">Built for surveyors, engineers and field teams who need positions they can trust, and data they can take straight into their tools.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></svg></div>
+        <h3>Live coordinates</h3>
+        <p>Decimal, DMS, degrees-minutes or UTM, with accuracy, sea-level altitude, speed and heading.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.3-7-11a7 7 0 0 1 14 0c0 4.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+        <h3>Averaged waypoints</h3>
+        <p>Hold still and the app combines dozens of fixes into one point, typically within 1–3 m outdoors.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 17l3-3m2-2l2-2m2-2l1.5-1.5" stroke-dasharray="0"/></svg></div>
+        <h3>Interval route recording</h3>
+        <p>Collect a point every 1 second to 10 minutes. Smoothing removes jitter; recording continues with the screen off.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></div>
+        <h3>Street and topo maps</h3>
+        <p>See routes and waypoints on OpenStreetMap or a topographic map with contour lines.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <h3>Satellite detail</h3>
+        <p>Satellites in use by system (GPS, Galileo, GLONASS, BeiDou) and signal strength, so you know how good a fix is.</p>
+      </div>
+      <div class="card">
+        <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 16l4-8 4 5 3-3 3 6"/></svg></div>
+        <h3>Route statistics</h3>
+        <p>Distance, duration, average speed, altitude range and climb, plus every recorded point.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="export">
+  <div class="wrap">
+    <h2>Export to the tools you already use</h2>
+    <p class="sub">Share by WhatsApp, email, Drive or Bluetooth, or save the file straight to your phone.</p>
+    <div class="formats">
+      <div class="fmt"><b>GPX</b><div>Garmin, OsmAnd, Strava and most GPS apps</div></div>
+      <div class="fmt"><b>KML</b><div>Google Earth and Google My Maps</div></div>
+      <div class="fmt"><b>CSV</b><div>Excel and Sheets, with UTM zone, easting and northing</div></div>
+      <div class="fmt"><b>GeoJSON</b><div>QGIS, ArcGIS and web maps</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="soft">
+  <div class="wrap">
+    <h2>Who it's for</h2>
+    <p class="sub">Anyone who needs to record where things are, accurately and quickly.</p>
+    <div class="who">
+      <div><b>Surveyors and engineers</b><span>Site points, water pans, boreholes, set-out checks.</span></div>
+      <div><b>County and NGO field teams</b><span>Asset mapping and project monitoring in the field.</span></div>
+      <div><b>Farmers and outdoor users</b><span>Plot corners, trails and places worth returning to.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="wrap privacy">
+    <div>
+      <h2>Private by design</h2>
+      <ul class="checks">
+        <li>No account and no sign-in</li>
+        <li>No ads and no tracking</li>
+        <li>Your locations stay on your phone</li>
+        <li>Files leave only when you choose to share or save them</li>
+      </ul>
+    </div>
+    <div class="note">
+      Positions come from your phone's GPS and are estimates. GPS Surveyor is a field tool, not a certified survey instrument; see the <a href="https://markogola.github.io/gps-tracker-privacy/terms/">Terms of Service</a>. Read how data is handled in the <a href="https://markogola.github.io/gps-tracker-privacy/">Privacy Policy</a>.
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="soft">
+  <div class="wrap">
+    <h2>Get in touch</h2>
+    <p class="sub">Questions, feature requests, or want to be told when GPS Surveyor is on Google Play? Email <a href="mailto:markogola1@gmail.com?subject=GPS%20Surveyor">markogola1@gmail.com</a>.</p>
+    <a class="btn primary" href="mailto:markogola1@gmail.com?subject=GPS%20Surveyor">Email the developer</a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 GPS Surveyor</span>
+    <span><a href="https://markogola.github.io/gps-tracker-privacy/">Privacy Policy</a> · <a href="https://markogola.github.io/gps-tracker-privacy/terms/">Terms of Service</a> · <a href="mailto:markogola1@gmail.com">Contact</a></span>
+    <span>Map data © OpenStreetMap contributors</span>
+  </div>
+</footer>
+
+</body>
+</html>
